@@ -8,6 +8,7 @@ import type { RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
+import { LoadingPage } from "~/components/loading";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -55,14 +56,30 @@ const PostView = (props: PostWithUser) => {
   )
 }
 
-const Home: NextPage = () => {
-  const user = useUser()
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
 
-  const { data, isLoading } = api.posts.getAll.useQuery();
-
-  if (isLoading) return <div>Loading...</div>;
+  if (postsLoading) return <LoadingPage />;
 
   if (!data) return <div>Something went wrong</div>;
+
+  return (
+    <div className="flex flex-col">
+      {[...data, ...data]?.map((fullPost) => (
+        <PostView {...fullPost} key={fullPost.post.id} />
+      ))}
+    </div>
+  )
+}
+
+const Home: NextPage = () => {
+  const { isLoaded: userLoaded, isSignedIn } = useUser()
+
+  // start fetching asap
+  api.posts.getAll.useQuery();
+
+  // return empty div if user isn't loaded yet
+  if (!userLoaded) return <div />;
 
   return (
     <>
@@ -75,7 +92,7 @@ const Home: NextPage = () => {
         <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
           <div className="p-6 flex border-b border-slate-400">
             {
-              !user.isSignedIn &&
+              !isSignedIn &&
               <SignInButton mode="modal">
                 <button className="w-fit rounded-lg py-2 px-8 cursor-pointer active:scale-95
                   shadow-md text-xs duration-300 bg-blue-700 active:bg-opacity-80
@@ -83,16 +100,12 @@ const Home: NextPage = () => {
               </SignInButton>
             }
 
-            {user.isSignedIn && <CreatePostWizard />}
+            {isSignedIn && <CreatePostWizard />}
           </div>
 
-          <div className="flex flex-col">
-            {[...data, ...data]?.map((fullPost) => (
-              <PostView {...fullPost} key={fullPost.post.id} />
-            ))}
-          </div>
+          <Feed />
           
-          <div className="flex justify-center p-8">{ !!user.isSignedIn &&
+          <div className="flex justify-center p-8">{ !!isSignedIn &&
             <SignOutButton>
               <button className="w-fit rounded-lg py-2 px-8 cursor-pointer active:scale-95
                 shadow-md text-xs duration-300 bg-red-700 active:bg-opacity-80
