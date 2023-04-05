@@ -9,26 +9,46 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
+import { useState } from "react";
+
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
 
-  // console.log(user);
+  const [input, setInput] = useState("");
+
+  const ctx = api.useContext();
+
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate();
+    },
+  });
 
   if (!user) return null;
 
-  return <div className="flex gap-4 w-full">
+  return <div className="flex gap-4 w-full items-center">
     <Image
       src={user.profileImageUrl} 
       alt={`@${user.username}'s profile image`} 
       width={64} height={64} 
       className="w-16 h-16 rounded-full" />
     <input
-      className="rounded-xl w-full bg-slate-900 text-white outline-none py-3 px-4 text-xs focus:px-6 duration-200"
+      className="rounded-xl w-full bg-transparent text-white outline-none py-3 px-4 text-xs focus:px-6 duration-200"
       type="text"
       placeholder="What do you think?"
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      disabled={isPosting}
       />
+    <button 
+      onClick={() => mutate({ content: input })}
+      className="w-fit h-fit rounded-lg py-2 px-8 cursor-pointer active:scale-95
+      shadow-md text-xs duration-300 bg-purple-400 active:bg-opacity-80
+      ease-in-out bg-transparent font-medium md:text-sm text-white"
+    >Post</button>
   </div>
 }
 
@@ -65,7 +85,7 @@ const Feed = () => {
 
   return (
     <div className="flex flex-col">
-      {[...data, ...data]?.map((fullPost) => (
+      {data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
     </div>
