@@ -8,8 +8,9 @@ import type { RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
-import { LoadingPage } from "~/components/loading";
+import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 dayjs.extend(relativeTime);
 
@@ -25,6 +26,14 @@ const CreatePostWizard = () => {
       setInput("");
       void ctx.posts.getAll.invalidate();
     },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to post! Please try again later.");
+      }
+    }
   });
 
   if (!user) return null;
@@ -32,7 +41,7 @@ const CreatePostWizard = () => {
   return <div className="flex gap-4 w-full items-center">
     <Image
       src={user.profileImageUrl} 
-      alt={`@${user.username}'s profile image`} 
+      alt={`@${user.username || 'username'}'s profile image`} 
       width={64} height={64} 
       className="w-16 h-16 rounded-full" />
     <input
@@ -41,14 +50,29 @@ const CreatePostWizard = () => {
       placeholder="What do you think?"
       value={input}
       onChange={(e) => setInput(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (input !== "") {
+            mutate({ content: input });
+          }
+        }
+      }}
       disabled={isPosting}
       />
-    <button 
-      onClick={() => mutate({ content: input })}
-      className="w-fit h-fit rounded-lg py-2 px-8 cursor-pointer active:scale-95
-      shadow-md text-xs duration-300 bg-purple-400 active:bg-opacity-80
-      ease-in-out bg-transparent font-medium md:text-sm text-white"
-    >Post</button>
+    {input !== "" && !isPosting && (
+      <button 
+        onClick={() => mutate({ content: input })} disabled={isPosting}
+        className="w-fit h-fit rounded-lg py-2 px-8 cursor-pointer active:scale-95
+        shadow-md text-xs duration-300 bg-purple-400 active:bg-opacity-80
+        ease-in-out bg-transparent font-medium md:text-sm text-white"
+      >Post</button>
+    )}
+    {isPosting && (
+      <div className="flex justify-center items-center pr-4">
+        <LoadingSpinner size={20} />
+      </div>
+    )}
   </div>
 }
 
