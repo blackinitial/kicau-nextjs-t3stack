@@ -4,7 +4,7 @@ import { api } from "~/utils/api";
 import { PageLayout } from "~/components/layout";
 import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
-import { PostView } from "~/components/postView";
+import { PostView } from "~/components/postview";
 
 const ProfileFeed = (props: {userId: string}) => {
   const { data, isLoading } = api.posts.getPostsByUserId.useQuery({ userId: props.userId });

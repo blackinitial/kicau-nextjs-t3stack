@@ -10,7 +10,7 @@ import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
-import { PostView } from "~/components/postView";
+import { PostView } from "~/components/postview";
 
 dayjs.extend(relativeTime);
 
