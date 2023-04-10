@@ -85,7 +85,7 @@ const Feed = () => {
 
   return (
     <div className="fle grow flex-col overflow-y-scroll">
-      {[...data, ...data, ...data].map((fullPost) => (
+      {data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
     </div>

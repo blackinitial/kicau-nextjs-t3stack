@@ -24,6 +24,7 @@ const ProfileFeed = (props: {userId: string}) => {
 const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
 
   const { data } = api.profile.getUserByUsername.useQuery({ username });
+  const usernameChecked = (data?.username ?? data?.externalUsername) || 'no username';
   
   // remove loading state cause no data state and just from server directly
   // if (isLoading) {console.log("isLoading")}
@@ -35,19 +36,19 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   return (
     <>
       <Head>
-        <title>{data.username}</title>
+        <title>{usernameChecked}</title>
       </Head>
       <PageLayout>
         <div className="relative h-36 bg-slate-600">
           <Image
             src={data.profileImageUrl}
-            alt={`@${data.username || 'username'}'s profile image`}
+            alt={`@${usernameChecked}'s profile image`}
             width={128} height={128}
             className="absolute bottom-0 left-0 -mb-[64px] ml-4 rounded-full border-4 border-black bg-black"
           />
         </div>
         <div className="h-[64px]"></div>
-        <div className="p-4 text-2xl font-bold">{`@${data.username ?? ''}`}</div>
+        <div className="p-4 text-2xl font-bold">{`@${usernameChecked}`}</div>
         <div className="w-full border-b border-slate-400"></div>
 
         <ProfileFeed userId={data.id} />
