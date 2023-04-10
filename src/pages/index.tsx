@@ -1,11 +1,10 @@
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import { SignInButton, SignOutButton, UserButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 
 import { api } from "~/utils/api";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import Image from "next/image";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -39,11 +38,14 @@ const CreatePostWizard = () => {
   if (!user) return null;
 
   return <div className="flex gap-4 w-full items-center">
-    <Image
-      src={user.profileImageUrl} 
-      alt={`@${user.username || 'username'}'s profile image`} 
-      width={64} height={64} 
-      className="w-16 h-16 rounded-full" />
+    <UserButton appearance={{
+        elements: {
+          userButtonAvatarBox: {
+            width: 64,
+            height: 64
+          }
+        }
+      }} />
     <input
       className="rounded-xl w-full bg-transparent text-white outline-none py-3 px-4 text-xs focus:px-6 duration-200"
       type="text"
